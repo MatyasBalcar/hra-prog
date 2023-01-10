@@ -1,6 +1,6 @@
 import pygame
 from sys import exit
-
+import random
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos_y,pos_x):
 		super().__init__()
@@ -40,12 +40,18 @@ class Player(pygame.sprite.Sprite):
 		self.position_update()
 		self.animation_state()
 
-def collision_sprite():
-	if pygame.sprite.spritecollide(player.sprite,obstacle_group,False):
-		obstacle_group.empty()
-		return False
-	else: return True
+class Enemy(pygame.sprite.Sprite):
+	def __init__(self):
+		super().__init__()
+		self.enemy_sprite = pygame.image.load('gamefiles/graphics/enemy/enemy.png').convert_alpha()
+		self.image=self.enemy_sprite
+		self.rect = self.image.get_rect(midbottom = (random.randint(500,800),random.randint(0,350)))
 
+
+
+	def update(self):
+		self.image=self.enemy_sprite
+		self.rect.x -= 1
 
 pygame.init()
 screen = pygame.display.set_mode((800,400))
@@ -56,10 +62,12 @@ game_active = False
 start_time = 0
 
 #Groups
+enemy=pygame.sprite.Group()
 player = pygame.sprite.GroupSingle()
 player.add(Player(200,200))
+enemy.add(Enemy())
 
-obstacle_group = pygame.sprite.Group()
+
 
 sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
@@ -90,13 +98,19 @@ while True:
 	if game_active:
 		screen.blit(sky_surface,(0,0))
 
+		x=random.randint(1,300)
+
+		if x==1:
+			enemy.add(Enemy())
+
+
 		player.draw(screen)
 		player.update()
+		enemy.draw(screen)
+		enemy.update()
 
-		obstacle_group.draw(screen)
-		obstacle_group.update()
 
-		game_active = collision_sprite()
+
 		
 	else:
 		screen.fill((94,129,162))
