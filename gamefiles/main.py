@@ -104,6 +104,11 @@ game_name_rect = game_name.get_rect(center = (400,80))
 
 score=0
 
+
+font = pygame.font.Font('freesansbold.ttf', 32)
+text = font.render(str(score), True, (161, 3, 3))
+textRect = text.get_rect()
+textRect.center = (150,60)
 # Timer 
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer,1500)
@@ -120,6 +125,7 @@ while True:
 
 	if game_active:
 		screen.blit(sky_surface,(0,0))
+		screen.blit(text, textRect)
 		#print(player_obj.pos_x)
 		spawn_chance_inverted=250
 		x=random.randint(1,spawn_chance_inverted)
@@ -141,8 +147,8 @@ while True:
 					b.kill()
 		if x==1:
 			enemy.add(Enemy())
-		print(score)
 
+		text = font.render(str(score), True, (161, 3, 3))
 		player.draw(screen)
 		player.update()
 		enemy.draw(screen)
