@@ -1,7 +1,14 @@
 import pygame
 from sys import exit
 import random
+import os
 
+import sys
+
+
+f = open('game_stats.txt','r')
+high_score=f.read()
+f.close
 
 class Bulet(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y,bullet_speed):
@@ -116,6 +123,11 @@ pygame.time.set_timer(obstacle_timer,1500)
 while True:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
+			if score>int(float(high_score)):
+					f = open('game_stats.txt','w')
+					f.write(str(score))
+					print("new high score")
+					f.close
 			pygame.quit()
 			exit()
 		else:
@@ -127,7 +139,7 @@ while True:
 		screen.blit(sky_surface,(0,0))
 		screen.blit(text, textRect)
 		#print(player_obj.pos_x)
-		spawn_chance_inverted=250
+		spawn_chance_inverted=200
 		x=random.randint(1,spawn_chance_inverted)
 		for e in enemy:
 			enemy_rect = e.rect
@@ -135,6 +147,12 @@ while True:
 			colide=pygame.Rect.colliderect(player_rect,enemy_rect)
 			if colide:
 				enemy=[]
+				if score>int(float(high_score)):
+					f = open('game_stats.txt','w')
+					f.write(str(score))
+					print("new high score")
+					f.close
+				sys.exit()
 				game_active=False
 		for b in bullets:
 			bullet_rect=b.rect
