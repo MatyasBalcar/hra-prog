@@ -64,10 +64,9 @@ start_time = 0
 #Groups
 enemy=pygame.sprite.Group()
 player = pygame.sprite.GroupSingle()
-player.add(Player(200,200))
+player_obj=Player(200,200)
+player.add(player_obj)
 enemy.add(Enemy())
-
-
 
 sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
