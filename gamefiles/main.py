@@ -5,11 +5,14 @@ import os
 
 import sys
 
+pygame.init()
 
 f = open('game_stats.txt','r')
 high_score=f.read()
 f.close
 
+
+poyo = pygame.mixer.Sound('gamefiles/sound/poyo.wav')
 class Bulet(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y,bullet_speed):
 		super().__init__()
@@ -53,7 +56,9 @@ class Player(pygame.sprite.Sprite):
 			self.pos_x+=self.speed
 		elif keys[pygame.K_q ] and self.shoot_delay==0:
 			bullets.add(Bulet(self.pos_x,self.pos_y,self.bullet_speed))
+		
 			self.shoot_delay=100
+			pygame.mixer.Sound.play(poyo)
 
 	def position_update(self):
 		self.rect.center=[self.pos_x,self.pos_y]
@@ -82,7 +87,8 @@ class Enemy(pygame.sprite.Sprite):
 		self.rect.x -= 1
 
 
-pygame.init()
+
+
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption('Space shooter')
 clock = pygame.time.Clock()
@@ -118,7 +124,7 @@ textRect = text.get_rect()
 textRect.center = (150,60)
 
 font2 = pygame.font.Font('freesansbold.ttf', 20)
-text2 = font2.render(f"High score: {str(high_score)}", True, (161, 3, 3))
+text2 = font2.render(f"High score: {str(high_score)}", True, (64, 168, 50))
 textRect2 = text2.get_rect()
 textRect2.center = (275,60)
 # Timer 
