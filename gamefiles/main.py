@@ -75,7 +75,7 @@ class Enemy(pygame.sprite.Sprite):
 		super().__init__()
 		self.enemy_sprite = pygame.image.load('gamefiles/graphics/enemy/enemy.png').convert_alpha()
 		self.image=self.enemy_sprite
-		self.rect = self.image.get_rect(midbottom = (random.randint(500,800),random.randint(0,350)))
+		self.rect = self.image.get_rect(midbottom = (random.randint(500,800),random.randint(50,300)))
 
 	def update(self):
 		self.image=self.enemy_sprite
@@ -112,10 +112,15 @@ game_name_rect = game_name.get_rect(center = (400,80))
 score=0
 
 
-font = pygame.font.Font('freesansbold.ttf', 32)
-text = font.render(str(score), True, (161, 3, 3))
+font = pygame.font.Font('freesansbold.ttf',20)
+text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 textRect = text.get_rect()
 textRect.center = (150,60)
+
+font2 = pygame.font.Font('freesansbold.ttf', 20)
+text2 = font2.render(f"High score: {str(high_score)}", True, (161, 3, 3))
+textRect2 = text2.get_rect()
+textRect2.center = (275,60)
 # Timer 
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer,1500)
@@ -138,6 +143,7 @@ while True:
 	if game_active:
 		screen.blit(sky_surface,(0,0))
 		screen.blit(text, textRect)
+		screen.blit(text2, textRect2)
 		#print(player_obj.pos_x)
 		spawn_chance_inverted=200
 		x=random.randint(1,spawn_chance_inverted)
@@ -166,7 +172,8 @@ while True:
 		if x==1:
 			enemy.add(Enemy())
 
-		text = font.render(str(score), True, (161, 3, 3))
+		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
+		
 		player.draw(screen)
 		player.update()
 		enemy.draw(screen)
