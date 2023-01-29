@@ -36,6 +36,7 @@ class Player(pygame.sprite.Sprite):
 		self.player_index = 0
 		self.pos_y=pos_y
 		self.pos_x=pos_x
+		self.player_health=3
 		self.image = self.player_walk[self.player_index]
 		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
 		self.speed=3
@@ -85,7 +86,18 @@ class Enemy(pygame.sprite.Sprite):
 	def update(self):
 		self.image=self.enemy_sprite
 		self.rect.x -= 1
+class Lifepoint(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.health_point_sprite = pygame.image.load('gamefiles/graphics/zivot.png').convert_alpha()
+		self.image=self.health_point_sprite
+		self.pos_y=pos_y
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
 
+	def update(self):
+		pass
+		
 
 
 
@@ -100,10 +112,17 @@ start_time = 0
 enemy=pygame.sprite.Group()
 player = pygame.sprite.GroupSingle()
 bullets = pygame.sprite.Group()
+lifes = pygame.sprite.Group()
 
+lifes.add(Lifepoint(400,75))
+lifes.add(Lifepoint(450,75))
+lifes.add(Lifepoint(500,75))
 player_obj=Player(200,200,2)
 player.add(player_obj)
 enemy.add(Enemy())
+lifes_list=[]
+for l in lifes:
+	lifes_list.append(l)
 
 sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
@@ -151,21 +170,25 @@ while True:
 		screen.blit(text, textRect)
 		screen.blit(text2, textRect2)
 		#print(player_obj.pos_x)
-		spawn_chance_inverted=200
+		spawn_chance_inverted=100
 		x=random.randint(1,spawn_chance_inverted)
 		for e in enemy:
 			enemy_rect = e.rect
 			player_rect=player_obj.rect
 			colide=pygame.Rect.colliderect(player_rect,enemy_rect)
 			if colide:
-				enemy=[]
+				e.kill()
+				removed=lifes_list[player_obj.player_health-1]
+				lifes.remove(removed)
+				player_obj.player_health-=1
 				if score>int(float(high_score)):
 					f = open('game_stats.txt','w')
 					f.write(str(score))
 					print("new high score")
 					f.close
-				sys.exit()
-				game_active=False
+				if player_obj.player_health==0:
+					sys.exit()
+					game_active=False
 		for b in bullets:
 			bullet_rect=b.rect
 			for e in enemy:
@@ -180,12 +203,14 @@ while True:
 
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
+		
+		lifes.draw(screen)
 		player.draw(screen)
 		player.update()
-		enemy.draw(screen)
-		enemy.update()
 		bullets.draw(screen)
 		bullets.update()
+		enemy.draw(screen)
+		enemy.update()
 		if player_obj.shoot_delay<20:color=(64, 168, 50)
 		elif player_obj.shoot_delay<40:color=(214, 240, 113)
 		elif player_obj.shoot_delay<60:color=(229, 240, 113)
