@@ -167,10 +167,9 @@ while True:
 
 	if game_active:
 		screen.blit(sky_surface,(0,0))
-		screen.blit(text, textRect)
-		screen.blit(text2, textRect2)
+		
 		#print(player_obj.pos_x)
-		spawn_chance_inverted=100
+		spawn_chance_inverted=150
 		x=random.randint(1,spawn_chance_inverted)
 		for e in enemy:
 			enemy_rect = e.rect
@@ -204,7 +203,7 @@ while True:
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
 		
-		lifes.draw(screen)
+		
 		player.draw(screen)
 		player.update()
 		bullets.draw(screen)
@@ -216,8 +215,10 @@ while True:
 		elif player_obj.shoot_delay<60:color=(229, 240, 113)
 		elif player_obj.shoot_delay<80:color=(161, 85, 3)
 		else:color=(161, 3, 3)
-		pygame.draw.rect(screen, color, pygame.Rect(30, 30, 60, 60))
-
+		pygame.draw.circle(screen,color,(60,60),20)
+		screen.blit(text, textRect)
+		screen.blit(text2, textRect2)
+		lifes.draw(screen)
 		
 	else:
 		screen.fill((94,129,162))
