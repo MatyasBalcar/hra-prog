@@ -37,6 +37,7 @@ class Player(pygame.sprite.Sprite):
 		self.pos_y=pos_y
 		self.pos_x=pos_x
 		self.player_health=3
+		self.hasnuke=False
 		self.image = self.player_walk[self.player_index]
 		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
 		self.speed=3
@@ -60,6 +61,10 @@ class Player(pygame.sprite.Sprite):
 		
 			self.shoot_delay=100
 			pygame.mixer.Sound.play(poyo)
+		elif keys[pygame.K_e] and self.hasnuke:
+			enemy.empty()
+			self.hasnuke=False
+			nuke.empty()
 
 	def position_update(self):
 		self.rect.center=[self.pos_x,self.pos_y]
@@ -86,6 +91,16 @@ class Enemy(pygame.sprite.Sprite):
 	def update(self):
 		self.image=self.enemy_sprite
 		self.rect.x -= 1
+class Nuke(pygame.sprite.Sprite):
+	def __init__(self):
+		super().__init__()
+		self.nuke_png = pygame.image.load('gamefiles/graphics/nuke.png').convert_alpha()
+		self.image=self.nuke_png
+		self.rect = self.image.get_rect(midbottom = (random.randint(500,800),random.randint(50,300)))
+		self.type="nuke"
+	def update(self):
+		self.image=self.nuke_png
+		self.rect.x -= 1
 class Lifepoint(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y):
 		super().__init__()
@@ -97,7 +112,17 @@ class Lifepoint(pygame.sprite.Sprite):
 
 	def update(self):
 		pass
-		
+class nuke_huf(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.health_point_sprite = pygame.image.load('gamefiles/graphics/nuke.png').convert_alpha()
+		self.image=self.health_point_sprite
+		self.pos_y=pos_y
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
+
+	def update(self):
+		pass		
 
 
 
@@ -113,6 +138,8 @@ enemy=pygame.sprite.Group()
 player = pygame.sprite.GroupSingle()
 bullets = pygame.sprite.Group()
 lifes = pygame.sprite.Group()
+powerups=pygame.sprite.Group()
+nuke=pygame.sprite.GroupSingle()
 
 lifes.add(Lifepoint(400,75))
 lifes.add(Lifepoint(450,75))
@@ -169,8 +196,19 @@ while True:
 		screen.blit(sky_surface,(0,0))
 		
 		#print(player_obj.pos_x)
-		spawn_chance_inverted=150
+		spawn_chance_inverted=5000
 		x=random.randint(1,spawn_chance_inverted)
+		for p in powerups:
+			nuke_rect = p.rect
+			player_rect=player_obj.rect
+			colide=pygame.Rect.colliderect(player_rect,nuke_rect)
+			if colide and player_obj.hasnuke==False:
+				if p.type=="nuke":
+					player_obj.hasnuke=True
+					nuke.add(nuke_huf(550,75))
+				p.kill()
+			
+
 		for e in enemy:
 			enemy_rect = e.rect
 			player_rect=player_obj.rect
@@ -197,9 +235,11 @@ while True:
 					score+=1
 					e.kill()
 					b.kill()
-		if x==1:
+		if x>1 and x<50 :
 			enemy.add(Enemy())
+		elif x==spawn_chance_inverted:
 
+			powerups.add(Nuke())
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
 		
@@ -208,8 +248,11 @@ while True:
 		player.update()
 		bullets.draw(screen)
 		bullets.update()
+		powerups.draw(screen)
+		powerups.update()
 		enemy.draw(screen)
 		enemy.update()
+		nuke.draw(screen)
 		if player_obj.shoot_delay<20:color=(64, 168, 50)
 		elif player_obj.shoot_delay<40:color=(214, 240, 113)
 		elif player_obj.shoot_delay<60:color=(229, 240, 113)
