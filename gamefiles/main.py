@@ -69,7 +69,12 @@ class Player(pygame.sprite.Sprite):
 			nuke.empty()
 		elif keys[pygame.K_f] and self.healthpot_timer==0 and self.player_health<3:
 			self.player_health+=1
-			lifes.add(Lifepoint(400+self.player_health*50-50,75))
+			if self.player_health==1:
+				lifes.add(Lifepoint(420,75))
+			elif self.player_health==2:
+				lifes.add(Lifepoint(450,75))
+			elif self.player_health==3:
+				lifes.add(Lifepoint(480,75))
 			self.healthpot_timer+=self.health_delay
 			for h in health_pot:
 				h.kill()
@@ -137,7 +142,28 @@ class nuke_hud(pygame.sprite.Sprite):
 
 	def update(self):
 		pass		
+class health_pot_back(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.health_point_sprite = pygame.image.load('gamefiles\graphics\potion\okraj.png').convert_alpha()
+		self.image=self.health_point_sprite
+		self.pos_y=pos_y
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
 
+	def update(self):
+		pass	
+class health_bar_back(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.health_point_sprite = pygame.image.load('gamefiles\graphics\health_bar.png').convert_alpha()
+		self.image=self.health_point_sprite
+		self.pos_y=pos_y
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
+
+	def update(self):
+		pass	
 class healt_pot_hud(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y):
 		super().__init__()
@@ -154,7 +180,7 @@ class healt_pot_hud(pygame.sprite.Sprite):
 		if math.floor(self.animation_count)==3:
 			self.animation_count=0
 		else:self.animation_count+=0.1
-		print(self.animation_count)
+
 		if self.animation_count>=0 and self.animation_count<=1:
 			self.image=sprites[0]
 		elif self.animation_count>1 and self.animation_count<=2:
@@ -180,15 +206,18 @@ bullets = pygame.sprite.Group()
 lifes = pygame.sprite.Group()
 powerups=pygame.sprite.Group()
 nuke=pygame.sprite.GroupSingle()
-
-
+health_pot_back_group=pygame.sprite.GroupSingle()
+health_bar=pygame.sprite.GroupSingle()
 #adding to sprite groups for renders
 powerups.add(Nuke())#!TEMP
+
+health_pot_back_group.add(health_pot_back(600,75))
+health_bar.add(health_bar_back(450,75))
 health_pot_obj=healt_pot_hud(600,75)
 health_pot.add(health_pot_obj)
-lifes.add(Lifepoint(400,75))
+lifes.add(Lifepoint(420,75))
 lifes.add(Lifepoint(450,75))
-lifes.add(Lifepoint(500,75))
+lifes.add(Lifepoint(480,75))
 player_obj=Player(200,200,2)
 player.add(player_obj)
 enemy.add(Enemy())
@@ -231,7 +260,7 @@ while True:
 			if score>int(float(high_score)):
 					f = open('game_stats.txt','w')
 					f.write(str(score))
-					print("new high score")
+
 					f.close
 			pygame.quit()
 			exit()
@@ -243,8 +272,7 @@ while True:
 
 	if game_active:
 		screen.blit(sky_surface,(0,0))
-		
-		#print(player_obj.pos_x)
+
 		spawn_chance_inverted=5000
 		x=random.randint(1,spawn_chance_inverted)
 		for p in powerups:
@@ -258,7 +286,7 @@ while True:
 				p.kill()
 			
 
-		print(player_obj.healthpot_timer)
+
 		for e in enemy:
 
 			enemy_rect = e.rect
@@ -266,13 +294,23 @@ while True:
 			colide=pygame.Rect.colliderect(player_rect,enemy_rect)
 			if colide:
 				e.kill()
-				removed=lifes_list[player_obj.player_health-1]
-				lifes.remove(removed)
 				player_obj.player_health-=1
+				for l in lifes:
+					l.kill()
+				if player_obj.player_health==3:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+					lifes.add(Lifepoint(480,75))
+				elif player_obj.player_health==2:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+				elif player_obj.player_health==1:
+					lifes.add(Lifepoint(420,75))
+				
 				if score>int(float(high_score)):
 					f = open('game_stats.txt','w')
 					f.write(str(score))
-					print("new high score")
+
 					f.close
 				if player_obj.player_health==0:
 					sys.exit()
@@ -293,11 +331,14 @@ while True:
 			powerups.add(Nuke())
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
-		
+		#HUD
+		health_bar.draw(screen)
+		health_pot_back_group.draw(screen)
 		health_pot.draw(screen)
 		health_pot.update()
 		player.draw(screen)
 		player.update()
+		#GAME
 		bullets.draw(screen)
 		bullets.update()
 		powerups.draw(screen)
