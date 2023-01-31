@@ -1,0 +1,4 @@
+--> Bullet textura, muze byt mensi
+--> hvezda textura
+--> health pot textura 
+-->Kolize enemz s koncem mapy

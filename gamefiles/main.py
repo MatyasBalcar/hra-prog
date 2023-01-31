@@ -2,7 +2,7 @@ import pygame
 from sys import exit
 import random
 import sys
-import time
+
 
 pygame.init()
 
@@ -36,7 +36,9 @@ class Player(pygame.sprite.Sprite):
 		self.pos_y=pos_y
 		self.pos_x=pos_x
 		self.player_health=3
+		self.healthpot_timer=0
 		self.hasnuke=False
+		self.health_delay=500
 		self.image = self.player_walk[self.player_index]
 		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
 		self.speed=3
@@ -65,6 +67,13 @@ class Player(pygame.sprite.Sprite):
 			enemy.empty()
 			self.hasnuke=False
 			nuke.empty()
+		elif keys[pygame.K_f] and self.healthpot_timer==0 and self.player_health<3:
+			self.player_health+=1
+			lifes.add(Lifepoint(400+self.player_health*50-50,75))
+			self.healthpot_timer+=self.health_delay
+			for h in health_pot:
+				h.kill()
+			
 
 	def position_update(self):
 		self.rect.center=[self.pos_x,self.pos_y]
@@ -80,6 +89,10 @@ class Player(pygame.sprite.Sprite):
 		
 		if self.shoot_delay>0:
 			self.shoot_delay-=self.reload_speed
+		if self.healthpot_timer>0:
+			self.healthpot_timer-=1
+		if self.healthpot_timer==0 and len(health_pot)==0:
+			health_pot.add(healt_pot_hud(600,75))
 		
 class Enemy(pygame.sprite.Sprite):
 	def __init__(self):
@@ -91,6 +104,7 @@ class Enemy(pygame.sprite.Sprite):
 	def update(self):
 		self.image=self.enemy_sprite
 		self.rect.x -= 1
+
 class Nuke(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
@@ -124,6 +138,17 @@ class nuke_hud(pygame.sprite.Sprite):
 	def update(self):
 		pass		
 
+class healt_pot_hud(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.health_point_sprite = pygame.image.load('gamefiles\graphics\healt_pot.png').convert_alpha()
+		self.image=self.health_point_sprite
+		self.pos_y=pos_y
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
+
+	def update(self):
+		pass	
 
 
 screen = pygame.display.set_mode((800,400))
@@ -140,8 +165,11 @@ bullets = pygame.sprite.Group()
 lifes = pygame.sprite.Group()
 powerups=pygame.sprite.Group()
 nuke=pygame.sprite.GroupSingle()
+health_pot=pygame.sprite.GroupSingle()
 
-powerups.add(Nuke())
+powerups.add(Nuke())#!TEMP
+
+health_pot.add(healt_pot_hud(600,75))
 lifes.add(Lifepoint(400,75))
 lifes.add(Lifepoint(450,75))
 lifes.add(Lifepoint(500,75))
@@ -212,7 +240,9 @@ while True:
 				p.kill()
 			
 
+		print(player_obj.healthpot_timer)
 		for e in enemy:
+
 			enemy_rect = e.rect
 			player_rect=player_obj.rect
 			colide=pygame.Rect.colliderect(player_rect,enemy_rect)
@@ -246,7 +276,7 @@ while True:
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
 		
-		
+		health_pot.draw(screen)
 		player.draw(screen)
 		player.update()
 		bullets.draw(screen)
