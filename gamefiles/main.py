@@ -2,7 +2,7 @@ import pygame
 from sys import exit
 import random
 import sys
-
+import math
 
 pygame.init()
 
@@ -141,16 +141,30 @@ class nuke_hud(pygame.sprite.Sprite):
 class healt_pot_hud(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y):
 		super().__init__()
-		self.health_point_sprite = pygame.image.load('gamefiles\graphics\healt_pot.png').convert_alpha()
-		self.image=self.health_point_sprite
+		self.potion_gfx_1 = pygame.image.load('gamefiles\graphics\potion\potion1.png').convert_alpha()#!zmen to na dobrou path
+		self.potion_gfx_2 = pygame.image.load('gamefiles\graphics\potion\potion2.png').convert_alpha()#!zmen to na dobrou path
+		self.potion_gfx_3 = pygame.image.load('gamefiles\graphics\potion\potion3.png').convert_alpha()#!zmen to na dobrou path
+		self.image=self.potion_gfx_1
 		self.pos_y=pos_y
+		self.animation_count=0
 		self.pos_x=pos_x
 		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
-
+	def animation(self):
+		sprites=[self.potion_gfx_1,self.potion_gfx_2,self.potion_gfx_3]
+		if math.floor(self.animation_count)==3:
+			self.animation_count=0
+		else:self.animation_count+=0.1
+		print(self.animation_count)
+		if self.animation_count>=0 and self.animation_count<=1:
+			self.image=sprites[0]
+		elif self.animation_count>1 and self.animation_count<=2:
+			self.image=sprites[1]
+		elif self.animation_count>2 and self.animation_count<=3:
+			self.image=sprites[2]
 	def update(self):
-		pass	
+		self.animation()
 
-
+#stock code
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption('Space shooter')
 clock = pygame.time.Clock()
@@ -161,15 +175,17 @@ start_time = 0
 #Groups
 enemy=pygame.sprite.Group()
 player = pygame.sprite.GroupSingle()
+health_pot=pygame.sprite.GroupSingle()
 bullets = pygame.sprite.Group()
 lifes = pygame.sprite.Group()
 powerups=pygame.sprite.Group()
 nuke=pygame.sprite.GroupSingle()
-health_pot=pygame.sprite.GroupSingle()
 
+
+#adding to sprite groups for renders
 powerups.add(Nuke())#!TEMP
-
-health_pot.add(healt_pot_hud(600,75))
+health_pot_obj=healt_pot_hud(600,75)
+health_pot.add(health_pot_obj)
 lifes.add(Lifepoint(400,75))
 lifes.add(Lifepoint(450,75))
 lifes.add(Lifepoint(500,75))
@@ -180,9 +196,10 @@ lifes_list=[]
 for l in lifes:
 	lifes_list.append(l)
 
+#textura nebe
 sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
-# Intro screen
+#! Intro screen (TODO) zmen na lepsi i s instrukcemi
 player_stand = pygame.image.load('gamefiles/graphics/player/player_stand.png').convert_alpha()
 
 player_stand = pygame.transform.rotozoom(player_stand,0,2)
@@ -191,8 +208,8 @@ player_stand_rect = player_stand.get_rect(center = (400,200))
 game_name = test_font.render('Pixel Runner',False,(111,196,169))
 game_name_rect = game_name.get_rect(center = (400,80))
 
+#skore
 score=0
-
 
 font = pygame.font.Font('freesansbold.ttf',20)
 text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
@@ -203,6 +220,7 @@ font2 = pygame.font.Font('freesansbold.ttf', 20)
 text2 = font2.render(f"High score: {str(high_score)}", True, (64, 168, 50))
 textRect2 = text2.get_rect()
 textRect2.center = (275,60)
+
 # Timer 
 obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer,1500)
@@ -277,6 +295,7 @@ while True:
 		
 		
 		health_pot.draw(screen)
+		health_pot.update()
 		player.draw(screen)
 		player.update()
 		bullets.draw(screen)
