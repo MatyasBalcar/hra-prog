@@ -1,9 +1,8 @@
 import pygame
 from sys import exit
 import random
-import os
-
 import sys
+import time
 
 pygame.init()
 
@@ -44,6 +43,7 @@ class Player(pygame.sprite.Sprite):
 		self.reload_speed=1 
 		self.shoot_delay=0
 	def player_input(self):
+		
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_w] :
 			self.pos_y-=self.speed
@@ -60,7 +60,7 @@ class Player(pygame.sprite.Sprite):
 			bullets.add(Bulet(self.pos_x,self.pos_y,self.bullet_speed))
 		
 			self.shoot_delay=100
-			pygame.mixer.Sound.play(poyo)
+			#pygame.mixer.Sound.play(poyo)
 		elif keys[pygame.K_e] and self.hasnuke:
 			enemy.empty()
 			self.hasnuke=False
@@ -112,7 +112,7 @@ class Lifepoint(pygame.sprite.Sprite):
 
 	def update(self):
 		pass
-class nuke_huf(pygame.sprite.Sprite):
+class nuke_hud(pygame.sprite.Sprite):
 	def __init__(self,pos_x,pos_y):
 		super().__init__()
 		self.health_point_sprite = pygame.image.load('gamefiles/graphics/nuke.png').convert_alpha()
@@ -141,6 +141,7 @@ lifes = pygame.sprite.Group()
 powerups=pygame.sprite.Group()
 nuke=pygame.sprite.GroupSingle()
 
+powerups.add(Nuke())
 lifes.add(Lifepoint(400,75))
 lifes.add(Lifepoint(450,75))
 lifes.add(Lifepoint(500,75))
@@ -155,6 +156,7 @@ sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
 # Intro screen
 player_stand = pygame.image.load('gamefiles/graphics/player/player_stand.png').convert_alpha()
+
 player_stand = pygame.transform.rotozoom(player_stand,0,2)
 player_stand_rect = player_stand.get_rect(center = (400,200))
 
@@ -192,6 +194,7 @@ while True:
 				game_active = True
 				start_time = int(pygame.time.get_ticks() / 1000)
 
+
 	if game_active:
 		screen.blit(sky_surface,(0,0))
 		
@@ -205,7 +208,7 @@ while True:
 			if colide and player_obj.hasnuke==False:
 				if p.type=="nuke":
 					player_obj.hasnuke=True
-					nuke.add(nuke_huf(550,75))
+					nuke.add(nuke_hud(550,75))
 				p.kill()
 			
 
