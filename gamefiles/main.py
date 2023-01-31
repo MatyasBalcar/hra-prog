@@ -18,12 +18,26 @@ class Bulet(pygame.sprite.Sprite):
 		self.bullet_speed=bullet_speed
 		self.pos_x=pos_x
 		self.pos_y=pos_y
-		self.enemy_sprite = pygame.image.load('gamefiles/graphics/bullet/bullet.png').convert_alpha()
-		self.image=self.enemy_sprite
+		self.bullet_gfx_1 = pygame.image.load('gamefiles\graphics\Bullet\Bullet1.png').convert_alpha()#!zmen to na dobrou path
+		self.bullet_gfx_2 = pygame.image.load('gamefiles\graphics\Bullet\Bullet2.png').convert_alpha()#!zmen to na dobrou path
+		self.bullet_gfx_3 = pygame.image.load('gamefiles\graphics\Bullet\Bullet3.png').convert_alpha()#!zmen to na dobrou path
+		self.image=self.bullet_gfx_1
+		self.animation_count=0
 		self.rect = self.image.get_rect(midbottom = (pos_x,pos_y))
+	def animation(self):
+		sprites=[self.bullet_gfx_1,self.bullet_gfx_2,self.bullet_gfx_3]
+		if math.floor(self.animation_count)==3:
+			self.animation_count=0
+		else:self.animation_count+=0.1
 
+		if self.animation_count>=0 and self.animation_count<=1:
+			self.image=sprites[0]
+		elif self.animation_count>1 and self.animation_count<=2:
+			self.image=sprites[1]
+		elif self.animation_count>2 and self.animation_count<=3:
+			self.image=sprites[2]
 	def update(self):
-		self.image=self.enemy_sprite
+		self.animation()
 		self.rect.x += self.bullet_speed
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos_y,pos_x,bullet_speed):
@@ -331,13 +345,7 @@ while True:
 			powerups.add(Nuke())
 		text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
 		
-		#HUD
-		health_bar.draw(screen)
-		health_pot_back_group.draw(screen)
-		health_pot.draw(screen)
-		health_pot.update()
-		player.draw(screen)
-		player.update()
+		
 		#GAME
 		bullets.draw(screen)
 		bullets.update()
@@ -354,6 +362,14 @@ while True:
 		pygame.draw.circle(screen,color,(60,60),20)
 		screen.blit(text, textRect)
 		screen.blit(text2, textRect2)
+		
+		#HUD
+		health_bar.draw(screen)
+		health_pot_back_group.draw(screen)
+		health_pot.draw(screen)
+		health_pot.update()
+		player.draw(screen)
+		player.update()
 		lifes.draw(screen)
 		
 	else:
