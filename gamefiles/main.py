@@ -302,10 +302,24 @@ while True:
 
 
 		for e in enemy:
-
+			
 			enemy_rect = e.rect
 			player_rect=player_obj.rect
 			colide=pygame.Rect.colliderect(player_rect,enemy_rect)
+			if enemy_rect.x<0:
+				e.kill()
+				player_obj.player_health-=1
+				for l in lifes:
+					l.kill()
+				if player_obj.player_health==3:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+					lifes.add(Lifepoint(480,75))
+				elif player_obj.player_health==2:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+				elif player_obj.player_health==1:
+					lifes.add(Lifepoint(420,75))
 			if colide:
 				e.kill()
 				player_obj.player_health-=1

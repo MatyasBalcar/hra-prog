@@ -1,2 +1,1 @@
---> Bullet textura
 -->Kolize enemz s koncem mapy
