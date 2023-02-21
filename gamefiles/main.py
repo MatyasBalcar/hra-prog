@@ -242,6 +242,10 @@ for l in lifes:
 #textura nebe
 sky_surface = pygame.image.load('gamefiles/graphics/Sky.png').convert()
 
+load_surface = pygame.image.load('gamefiles/graphics/loading_screen.png').convert()
+
+game_over_surface = pygame.image.load('gamefiles/graphics/game_over.png').convert()
+
 #! Intro screen (TODO) zmen na lepsi i s instrukcemi
 player_stand = pygame.image.load('gamefiles/graphics/player/player_stand.png').convert_alpha()
 
@@ -253,6 +257,8 @@ game_name_rect = game_name.get_rect(center = (400,80))
 
 #skore
 score=0
+
+game_over=False
 
 font = pygame.font.Font('freesansbold.ttf',20)
 text = font.render(f"Score: {str(score)}", True, (161, 3, 3))
@@ -269,6 +275,7 @@ obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer,1500)
 
 while True:
+	
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			if score>int(float(high_score)):
@@ -278,12 +285,13 @@ while True:
 					f.close
 			pygame.quit()
 			exit()
+		
 		else:
 			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
 				game_active = True
 				start_time = int(pygame.time.get_ticks() / 1000)
 
-
+	
 	if game_active:
 		screen.blit(sky_surface,(0,0))
 
@@ -341,7 +349,7 @@ while True:
 
 					f.close
 				if player_obj.player_health==0:
-
+					game_over=True
 					game_active=False
 		for b in bullets:
 			bullet_rect=b.rect
@@ -385,10 +393,11 @@ while True:
 		player.draw(screen)
 		player.update()
 		lifes.draw(screen)
-		
+	elif game_over:
+		screen.blit(game_over_surface,(0,0))
 	else:
-		screen.fill((94,129,162))
-		screen.blit(player_stand,player_stand_rect)
+		screen.blit(load_surface,(0,0))
+		
 
 	pygame.display.update()
 	clock.tick(60)
