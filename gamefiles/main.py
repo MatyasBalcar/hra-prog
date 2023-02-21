@@ -400,10 +400,13 @@ while True:
 		print(pygame.mouse.get_pos())
 		if pygame.mouse.get_pos()[0]>50 and pygame.mouse.get_pos()[0]<330 and pygame.mouse.get_pos()[1]>300 and pygame.mouse.get_pos()[1] <340:
 			if pygame.mouse.get_pressed()[0]:
-				player_obj.player_health==3
+				player_obj.player_health=3
 				lifes.add(Lifepoint(420,75))
 				lifes.add(Lifepoint(450,75))
 				lifes.add(Lifepoint(480,75))
+				nuke.empty()
+				powerups.empty()
+				bullets.empty()
 				game_over=False
 				game_active=True
 		if pygame.mouse.get_pos()[0]>480 and pygame.mouse.get_pos()[0]<750 and pygame.mouse.get_pos()[1]>300 and pygame.mouse.get_pos()[1] <340:
