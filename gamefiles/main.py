@@ -287,7 +287,7 @@ while True:
 			exit()
 		
 		else:
-			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+			if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not game_over:
 				game_active = True
 				start_time = int(pygame.time.get_ticks() / 1000)
 
@@ -349,6 +349,8 @@ while True:
 
 					f.close
 				if player_obj.player_health==0:
+					for e in enemy:
+						e.kill()
 					game_over=True
 					game_active=False
 		for b in bullets:
@@ -395,9 +397,23 @@ while True:
 		lifes.draw(screen)
 	elif game_over:
 		screen.blit(game_over_surface,(0,0))
+		print(pygame.mouse.get_pos())
+		if pygame.mouse.get_pos()[0]>50 and pygame.mouse.get_pos()[0]<330 and pygame.mouse.get_pos()[1]>300 and pygame.mouse.get_pos()[1] <340:
+			if pygame.mouse.get_pressed()[0]:
+				player_obj.player_health==3
+				lifes.add(Lifepoint(420,75))
+				lifes.add(Lifepoint(450,75))
+				lifes.add(Lifepoint(480,75))
+				game_over=False
+				game_active=True
+		if pygame.mouse.get_pos()[0]>480 and pygame.mouse.get_pos()[0]<750 and pygame.mouse.get_pos()[1]>300 and pygame.mouse.get_pos()[1] <340:
+			if pygame.mouse.get_pressed()[0]:
+				sys.exit()
+
 	else:
 		screen.blit(load_surface,(0,0))
 		
 
 	pygame.display.update()
 	clock.tick(60)
+	#!TODO remove poweups
