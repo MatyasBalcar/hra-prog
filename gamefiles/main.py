@@ -341,7 +341,7 @@ while True:
 
 					f.close
 				if player_obj.player_health==0:
-					sys.exit()
+
 					game_active=False
 		for b in bullets:
 			bullet_rect=b.rect
@@ -352,7 +352,7 @@ while True:
 					score+=1
 					e.kill()
 					b.kill()
-		if x>1 and x<50 :
+		if x>1 and x<50 and len(enemy)<=6:
 			enemy.add(Enemy())
 		elif x==spawn_chance_inverted:
 
