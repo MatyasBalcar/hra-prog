@@ -13,11 +13,12 @@ f.close
 
 poyo = pygame.mixer.Sound('gamefiles/sound/poyo.wav')
 class Bulet(pygame.sprite.Sprite):
-	def __init__(self,pos_x,pos_y,bullet_speed):
+	def __init__(self,pos_x,pos_y,bullet_speed,dir_):
 		super().__init__()
 		self.bullet_speed=bullet_speed
 		self.pos_x=pos_x
 		self.pos_y=pos_y
+		self.dir_=dir_
 		self.bullet_gfx_1 = pygame.image.load('gamefiles\graphics\Bullet\Bullet1.png').convert_alpha()#!zmen to na dobrou path
 		self.bullet_gfx_2 = pygame.image.load('gamefiles\graphics\Bullet\Bullet2.png').convert_alpha()#!zmen to na dobrou path
 		self.bullet_gfx_3 = pygame.image.load('gamefiles\graphics\Bullet\Bullet3.png').convert_alpha()#!zmen to na dobrou path
@@ -38,7 +39,7 @@ class Bulet(pygame.sprite.Sprite):
 			self.image=sprites[2]
 	def update(self):
 		self.animation()
-		self.rect.x += self.bullet_speed
+		self.rect.x += self.bullet_speed * self.dir_
 class Player(pygame.sprite.Sprite):
 	def __init__(self,pos_y,pos_x,bullet_speed):
 		super().__init__()
@@ -73,7 +74,7 @@ class Player(pygame.sprite.Sprite):
 		elif keys[pygame.K_d] :
 			self.pos_x+=self.speed
 		elif keys[pygame.K_q ] and self.shoot_delay==0:
-			bullets.add(Bulet(self.pos_x,self.pos_y,self.bullet_speed))
+			bullets.add(Bulet(self.pos_x,self.pos_y,self.bullet_speed,1))
 		
 			self.shoot_delay=100
 			#pygame.mixer.Sound.play(poyo)
@@ -123,7 +124,42 @@ class Enemy(pygame.sprite.Sprite):
 	def update(self):
 		self.image=self.enemy_sprite
 		self.rect.x -= 1
+class Boss(pygame.sprite.Sprite):
+	def __init__(self):
+		super().__init__()
+		self.enemy_sprite = pygame.image.load('gamefiles/graphics/boss/boss.png').convert_alpha()
+		self.image=self.enemy_sprite
+		self.rect = self.image.get_rect(midbottom = (random.randint(500,800),random.randint(50,300)))
+		self.health=3
+		self.shoottimer=0
+		self.limits=[0,400]
+		self.distance=1
 
+	def shoot(self):
+		enemy_bullets.add(Bulet(self.rect.x, self.rect.y+50,3,-1))
+	def update(self):
+		#self.image=self.enemy_sprite
+		#self.rect.x -= 1
+		if self.rect.y==400:
+			self.distance=-1
+		elif self.rect.y==0:
+			self.distance=1
+		if self.distance==1 and self.rect.y<400:
+			self.rect.y+=1
+		elif self.distance==-1 and self.rect.y>0:
+			self.rect.y-=1
+
+		if self.shoottimer==0:
+			self.shoot()
+			self.shoottimer=50
+		else:
+			self.shoottimer-=1
+		pass
+		if self.health==0:
+			for b in boss:
+				b.kill()
+			print('ded')
+	
 class Nuke(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__()
@@ -203,7 +239,28 @@ class healt_pot_hud(pygame.sprite.Sprite):
 			self.image=sprites[2]
 	def update(self):
 		self.animation()
+class recharge(pygame.sprite.Sprite):
+	def __init__(self,pos_x,pos_y):
+		super().__init__()
+		self.recharge__gfx_1 = pygame.image.load('gamefiles\graphics\_recharge1.png').convert_alpha()#!zmen to na dobrou path
+		self.recharge__gfx_2 = pygame.image.load('gamefiles\graphics\_recharge2.png').convert_alpha()#!zmen to na dobrou path
+		self.recharge__gfx_3 = pygame.image.load('gamefiles\graphics\_recharge3.png').convert_alpha()#!zmen to na dobrou path
+		self.image=self.recharge__gfx_3
+		self.pos_y=pos_y
 
+		self.pos_x=pos_x
+		self.rect = self.image.get_rect(midbottom = (self.pos_x,self.pos_y))
+	def animation(self):
+
+		if player_obj.shoot_delay>=50:
+			self.image=self.recharge__gfx_1
+		elif player_obj.shoot_delay>0:
+			self.image=self.recharge__gfx_2
+		else:
+			self.image=self.recharge__gfx_3
+	def update(self):
+		self.animation()
+		
 #stock code
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption('Space shooter')
@@ -213,9 +270,16 @@ game_active = False
 start_time = 0
 
 #Groups
+recharge_obj=pygame.sprite.Group()
+recharge_obj.add(recharge(50,75))
+
+
 enemy=pygame.sprite.Group()
+boss=pygame.sprite.GroupSingle()
+
 player = pygame.sprite.GroupSingle()
 health_pot=pygame.sprite.GroupSingle()
+enemy_bullets=pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 lifes = pygame.sprite.Group()
 powerups=pygame.sprite.Group()
@@ -275,7 +339,9 @@ obstacle_timer = pygame.USEREVENT + 1
 pygame.time.set_timer(obstacle_timer,1500)
 
 while True:
-	
+	if score==30 and len(boss)==0:
+		boss_obj=Boss()
+		boss.add(boss_obj)
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			if score>int(float(high_score)):
@@ -308,7 +374,30 @@ while True:
 				p.kill()
 			
 
-
+		for b in enemy_bullets:
+			bullet_rect = b.rect
+			player_rect=player_obj.rect
+			colide=pygame.Rect.colliderect(player_rect,bullet_rect)
+			if colide:
+				b.kill()
+				player_obj.player_health-=1
+				for l in lifes:
+					l.kill()
+				if player_obj.player_health==3:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+					lifes.add(Lifepoint(480,75))
+				elif player_obj.player_health==2:
+					lifes.add(Lifepoint(420,75))
+					lifes.add(Lifepoint(450,75))
+				elif player_obj.player_health==1:
+					lifes.add(Lifepoint(420,75))
+			if player_obj.player_health==0:
+					b.kill()
+					for e in enemy:
+						e.kill()
+					game_over=True
+					game_active=False
 		for e in enemy:
 			
 			enemy_rect = e.rect
@@ -351,6 +440,9 @@ while True:
 				if player_obj.player_health==0:
 					for e in enemy:
 						e.kill()
+					for b in boss:
+						b.kill()
+					skore=0
 					game_over=True
 					game_active=False
 		for b in bullets:
@@ -362,7 +454,16 @@ while True:
 					score+=1
 					e.kill()
 					b.kill()
-		if x>1 and x<50 and len(enemy)<=6:
+			if len(boss)!=0:
+				
+				boss_rect=boss_obj.rect
+				if pygame.Rect.colliderect(boss_rect, bullet_rect):
+					boss_obj.health-=1
+					b.kill()
+					
+		if x>1 and x<30 and len(enemy)<=6:
+			enemy.add(Enemy())
+		if len(enemy)==0:
 			enemy.add(Enemy())
 		elif x==spawn_chance_inverted:
 
@@ -371,19 +472,21 @@ while True:
 		
 		
 		#GAME
+		recharge_obj.draw(screen)
+		recharge_obj.update()
 		bullets.draw(screen)
 		bullets.update()
+		enemy_bullets.draw(screen)
+		enemy_bullets.update()
 		powerups.draw(screen)
 		powerups.update()
 		enemy.draw(screen)
 		enemy.update()
 		nuke.draw(screen)
-		if player_obj.shoot_delay<20:color=(64, 168, 50)
-		elif player_obj.shoot_delay<40:color=(214, 240, 113)
-		elif player_obj.shoot_delay<60:color=(229, 240, 113)
-		elif player_obj.shoot_delay<80:color=(161, 85, 3)
-		else:color=(161, 3, 3)
-		pygame.draw.circle(screen,color,(60,60),20)
+		boss.draw(screen)
+		boss.update()
+		
+
 		screen.blit(text, textRect)
 		screen.blit(text2, textRect2)
 		
@@ -395,6 +498,7 @@ while True:
 		player.draw(screen)
 		player.update()
 		lifes.draw(screen)
+		
 	elif game_over:
 		screen.blit(game_over_surface,(0,0))
 		print(pygame.mouse.get_pos())
